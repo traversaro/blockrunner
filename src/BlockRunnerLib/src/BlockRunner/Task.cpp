@@ -35,6 +35,12 @@ void BlockRunner::Task::start()
     pimpl->isClosing = false;
     pimpl->taskThread = std::thread(&BlockRunner::Task::runThread, this);
     pimpl->state = BlockRunner::TaskState::Running;
+
+    // Configure diagrams
+    pimpl->diagrams.resize(1);
+    for (auto& diagram : pimpl->diagrams) {
+        diagram.reset();
+    }
 }
 
 void BlockRunner::Task::stop()
@@ -67,7 +73,10 @@ bool BlockRunner::Task::setPeriod(std::chrono::microseconds period)
 
 void BlockRunner::Task::runSinglePeriod()
 {
-    spdlog::info("blockrunner-server: run task for one period");
+    for (auto& diagram : pimpl->diagrams) {
+        diagram.advance(pimpl->period);
+    }
+    spdlog::info("blockrunner-server: task has been run for one period");
 }
 
 void BlockRunner::Task::runThread()
